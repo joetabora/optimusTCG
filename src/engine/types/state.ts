@@ -1,5 +1,7 @@
 import type { CardInstance } from "./card";
+import type { EngagementAssignment } from "./effect";
 import type { CommandIndex, InstanceId, PhaseId, PlayerId, WinReason } from "./ids";
+import type { CardCatalog } from "../catalog/schema";
 
 export interface PendingChoice {
   id: string;
@@ -30,6 +32,8 @@ export interface GameState {
   phase: PhaseId;
   players: Record<PlayerId, PlayerState>;
   instances: Record<InstanceId, CardInstance>;
+  engagements: EngagementAssignment[];
+  hasPassedOperations: boolean;
   pendingChoice: PendingChoice | null;
   winnerId: PlayerId | null;
   winReason: WinReason | null;
@@ -40,6 +44,10 @@ export interface MatchConfig {
   matchId: string;
   seed: number;
   decks: Record<PlayerId, import("./ids").CardDefId[]>;
+  catalog?: CardCatalog;
+  deckSize?: number;
   startingIntegrity?: number;
   startingUplinkSize?: number;
+  skipOpeningTurnSetup?: boolean;
+  skipShuffle?: boolean;
 }

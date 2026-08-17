@@ -65,13 +65,14 @@ export function validateCatalog(cards: CardDefinition[]): CatalogValidationError
 export function validateDeckList(
   deck: CardDefId[],
   catalog: CardCatalog,
+  deckSize: number = DEFAULT_VAULT_SIZE,
 ): CatalogValidationError[] {
   const errors: CatalogValidationError[] = [];
   const counts = new Map<CardDefId, number>();
 
-  if (deck.length !== DEFAULT_VAULT_SIZE) {
+  if (deck.length !== deckSize) {
     errors.push({
-      message: `Deck must contain exactly ${DEFAULT_VAULT_SIZE} cards.`,
+      message: `Deck must contain exactly ${deckSize} cards.`,
     });
   }
 

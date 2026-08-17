@@ -1,12 +1,14 @@
+import { applyLegacyCommand } from "../actions/apply";
 import type { ApplyResult } from "../types/event";
 import type { Command } from "../types/command";
 import type { GameState } from "../types/state";
+import type { ActionContext } from "../actions/apply";
 
-/** Command application — implemented in Phase 3. */
-export function applyCommand(state: GameState, command: Command): ApplyResult {
-  return {
-    state,
-    events: [],
-    error: `Command "${command.type}" is not implemented yet.`,
-  };
+/** Backward-compatible command entry point. */
+export function applyCommand(
+  state: GameState,
+  command: Command,
+  context?: ActionContext,
+): ApplyResult {
+  return applyLegacyCommand(state, command, context);
 }

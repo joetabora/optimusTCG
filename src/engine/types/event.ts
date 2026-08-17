@@ -18,7 +18,21 @@ export type GameEvent =
       playerId: PlayerId;
       nexusIntegrity: number;
     }
-  | { type: "match_ended"; winnerId: PlayerId; reason: string };
+  | { type: "match_ended"; winnerId: PlayerId; reason: string }
+  | {
+      type: "damage_dealt";
+      target: InstanceId | "nexus";
+      targetPlayerId: PlayerId;
+      amount: number;
+      sourceId: InstanceId;
+    }
+  | { type: "construct_destroyed"; instanceId: InstanceId; playerId: PlayerId }
+  | {
+      type: "attack_declared";
+      attackerId: InstanceId;
+      target: InstanceId | "nexus";
+      playerId: PlayerId;
+    };
 
 export interface ApplyResult {
   state: import("./state").GameState;

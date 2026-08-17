@@ -19,4 +19,4 @@ export type PhaseId =
   | "resolution"
   | "cooldown";
 
-export type WinReason = "nexus_collapsed" | "concede";
+export type WinReason = "nexus_collapsed" | "concede" | "deck_empty";

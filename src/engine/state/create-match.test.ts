@@ -1,47 +1,55 @@
 import { describe, expect, it } from "vitest";
 import { buildDefaultDeck, getCardCatalog } from "../catalog";
-import { DEFAULT_STARTING_INTEGRITY, DEFAULT_STARTING_UPLINK_SIZE, DEFAULT_VAULT_SIZE } from "../catalog/schema";
+import {
+  DEFAULT_STARTING_INTEGRITY,
+  DEFAULT_STARTING_UPLINK_SIZE,
+  DEFAULT_VAULT_SIZE,
+} from "../catalog/schema";
 import { validateDeckList } from "../catalog/validate";
 import { createDefaultMatch, createMatch } from "./create-match";
 
 describe("createMatch", () => {
-  it("creates a match at cycle 1 ignition with player a active", () => {
+  it("creates a match in operations phase with player a active", () => {
     const state = createDefaultMatch(42, "test-match");
 
     expect(state.schemaVersion).toBe(1);
     expect(state.matchId).toBe("test-match");
     expect(state.seed).toBe(42);
     expect(state.cycle).toBe(1);
-    expect(state.phase).toBe("ignition");
+    expect(state.phase).toBe("operations");
     expect(state.activePlayerId).toBe("a");
     expect(state.winnerId).toBeNull();
     expect(state.winReason).toBeNull();
     expect(state.commandIndex).toBe(0);
+    expect(state.engagements).toEqual([]);
   });
 
-  it("initializes player nexus integrity and flux", () => {
+  it("initializes player a flux after opening turn setup", () => {
     const state = createDefaultMatch();
 
-    for (const playerId of ["a", "b"] as const) {
-      const player = state.players[playerId];
-      expect(player.nexusIntegrity).toBe(DEFAULT_STARTING_INTEGRITY);
-      expect(player.flux).toBe(0);
-      expect(player.fluxMax).toBe(0);
-    }
+    expect(state.players.a.fluxMax).toBe(1);
+    expect(state.players.a.flux).toBe(1);
+    expect(state.players.b.fluxMax).toBe(0);
+    expect(state.players.b.flux).toBe(0);
+    expect(state.players.a.nexusIntegrity).toBe(DEFAULT_STARTING_INTEGRITY);
+    expect(state.players.b.nexusIntegrity).toBe(DEFAULT_STARTING_INTEGRITY);
   });
 
-  it("shuffles vaults and deals opening uplink hands", () => {
+  it("deals opening uplink and first-cycle draw for active player", () => {
     const state = createDefaultMatch(99, "deal-test");
 
-    for (const playerId of ["a", "b"] as const) {
-      const player = state.players[playerId];
-      expect(player.uplink).toHaveLength(DEFAULT_STARTING_UPLINK_SIZE);
-      expect(player.vault).toHaveLength(DEFAULT_VAULT_SIZE - DEFAULT_STARTING_UPLINK_SIZE);
+    expect(state.players.a.uplink).toHaveLength(DEFAULT_STARTING_UPLINK_SIZE + 1);
+    expect(state.players.b.uplink).toHaveLength(DEFAULT_STARTING_UPLINK_SIZE);
+    expect(state.players.a.vault).toHaveLength(
+      DEFAULT_VAULT_SIZE - DEFAULT_STARTING_UPLINK_SIZE - 1,
+    );
+    expect(state.players.b.vault).toHaveLength(
+      DEFAULT_VAULT_SIZE - DEFAULT_STARTING_UPLINK_SIZE,
+    );
 
-      for (const instanceId of player.uplink) {
-        expect(state.instances[instanceId].zone).toBe("uplink");
-        expect(state.instances[instanceId].ownerId).toBe(playerId);
-      }
+    for (const instanceId of state.players.a.uplink) {
+      expect(state.instances[instanceId].zone).toBe("uplink");
+      expect(state.instances[instanceId].ownerId).toBe("a");
     }
   });
 
