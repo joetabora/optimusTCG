@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HELIX (optimusTCG)
 
-## Getting Started
+Original web-first competitive trading card game built with Next.js, TypeScript, Tailwind CSS, shadcn/ui, and Supabase.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Frontend:** Next.js App Router, React, Tailwind CSS, shadcn/ui
+- **Engine:** Pure TypeScript in `src/engine` (no React imports)
+- **Persistence (later):** Supabase Auth + PostgreSQL
+
+## Project structure
+
+```
+src/
+  app/           # Routes only
+  components/    # UI (game board is presentational)
+  engine/        # Rules, state, catalog — pure TS
+  lib/           # Adapters (local session, Supabase)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Engine public API
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```ts
+createMatch(config)
+createDefaultMatch(seed?, matchId?)
+applyCommand(state, command)      // Phase 3
+getLegalCommands(state, playerId) // Phase 3
+isTerminal(state)
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+```bash
+npm run dev      # Start Next.js dev server
+npm run build    # Production build
+npm run test     # Vitest (engine unit tests)
+npm run lint     # ESLint
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Implementation phases
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Scaffold (done)
+2. Engine types + `createMatch` (done)
+3. Command loop without effects
+4. Local sandbox UI
+5. Effect interpreter
+6. Engagement resolution
+7. Auth + profiles
+8. Deck persistence
+9. Match replay
+10. Authoritative multiplayer
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Game identity (HELIX)
 
-## Deploy on Vercel
+| Role | Term |
+|------|------|
+| Life | Nexus Integrity |
+| Resource | Flux |
+| Creature | Construct |
+| Spell | Schematic |
+| Permanent | Installation |
+| Deck | Vault |
+| Hand | Uplink |
+| Board | Field |
+| Turn | Cycle |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Win by reducing the opponent's Nexus Integrity to 0 or on concede.
