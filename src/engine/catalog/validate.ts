@@ -5,6 +5,7 @@ import {
   MAX_COPIES_PER_CARD,
   type CardCatalog,
 } from "./schema";
+import { validateCardAbilities, validateCardMetadata } from "./validate-effects";
 
 export interface CatalogValidationError {
   cardId?: CardDefId;
@@ -35,14 +36,8 @@ export function validateCardDefinition(card: CardDefinition): CatalogValidationE
     }
   }
 
-  for (const ability of card.abilities) {
-    if (!ability.id.trim()) {
-      errors.push({
-        cardId: card.id,
-        message: "Ability id is required.",
-      });
-    }
-  }
+  errors.push(...validateCardMetadata(card));
+  errors.push(...validateCardAbilities(card));
 
   return errors;
 }
@@ -57,6 +52,11 @@ export function validateCatalog(cards: CardDefinition[]): CatalogValidationError
     }
     seenIds.add(card.id);
     errors.push(...validateCardDefinition(card));
+  }
+
+  const catalog = new Map(cards.map((card) => [card.id, card]));
+  for (const card of cards) {
+    errors.push(...validateCardAbilities(card, catalog));
   }
 
   return errors;

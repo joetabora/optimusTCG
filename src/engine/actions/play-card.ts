@@ -1,6 +1,7 @@
 import type { CardCatalog } from "../catalog/schema";
 import { requireCardDefinition } from "../catalog/resolve";
 import { MAX_FIELD_CONSTRUCTS } from "../catalog/schema";
+import { resolveAbilities } from "../abilities/resolve";
 import type { GameEvent } from "../types/event";
 import type { InstanceId, PlayerId } from "../types/ids";
 import type { GameState } from "../types/state";
@@ -12,6 +13,7 @@ export function playCard(
   playerId: PlayerId,
   instanceId: InstanceId,
   catalog: CardCatalog,
+  chosenTargets: InstanceId[] = [],
 ): { state: GameState; events: GameEvent[] } | { error: string } {
   const instance = state.instances[instanceId];
   if (!instance) {
@@ -37,6 +39,15 @@ export function playCard(
     const moved = moveInstance(nextState, instanceId, "scrap", playerId);
     nextState = moved.state;
     events.push(...moved.events);
+
+    const resolved = resolveAbilities(nextState, "on_play", {
+      catalog,
+      sourcePlayerId: playerId,
+      sourceInstanceId: instanceId,
+      chosenTargets,
+    }, definition.abilities);
+    nextState = resolved.state;
+    events.push(...resolved.events);
   } else {
     if (countFieldCards(nextState, playerId) >= MAX_FIELD_CONSTRUCTS) {
       return { error: "Field is full." };
@@ -47,8 +58,18 @@ export function playCard(
     events.push(...moved.events);
 
     if (definition.kind === "construct") {
-      nextState.instances[instanceId].exhausted = true;
+      const cardInstance = nextState.instances[instanceId];
+      cardInstance.exhausted = !definition.keywords.includes("swift");
     }
+
+    const resolved = resolveAbilities(nextState, "on_enter_field", {
+      catalog,
+      sourcePlayerId: playerId,
+      sourceInstanceId: instanceId,
+      chosenTargets,
+    }, definition.abilities);
+    nextState = resolved.state;
+    events.push(...resolved.events);
   }
 
   events.push({ type: "card_played", playerId, instanceId });

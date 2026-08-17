@@ -108,6 +108,7 @@ export function createMatch(config: MatchConfig): GameState {
     matchId: config.matchId,
     seed: config.seed,
     rngIndex: 0,
+    instanceCounter: instanceOffset,
     cycle: 1,
     activePlayerId: "a",
     phase: "ignition",
@@ -143,6 +144,9 @@ export function createDefaultMatch(seed = 42, matchId = "local-1"): GameState {
   const catalog = resolveCatalog();
   const validDeck: CardDefId[] = [];
   for (const card of catalog.values()) {
+    if (!card.collectible) {
+      continue;
+    }
     validDeck.push(card.id, card.id);
   }
 

@@ -18,6 +18,8 @@ export function cloneInstance(instance: CardInstance): CardInstance {
     ...instance,
     counters: { ...instance.counters },
     attachments: [...instance.attachments],
+    statuses: [...instance.statuses],
+    abilitiesUsedThisCycle: [...instance.abilitiesUsedThisCycle],
   };
 }
 
@@ -53,6 +55,18 @@ export function cloneState(state: GameState): GameState {
             state.pendingChoice.legalTargets === "nexus"
               ? "nexus"
               : [...state.pendingChoice.legalTargets],
+          continuation: state.pendingChoice.continuation
+            ? {
+                ...state.pendingChoice.continuation,
+                effects: [...state.pendingChoice.continuation.effects],
+                context: {
+                  ...state.pendingChoice.continuation.context,
+                  chosenTargets: [
+                    ...state.pendingChoice.continuation.context.chosenTargets,
+                  ],
+                },
+              }
+            : undefined,
         }
       : null,
   };

@@ -7,6 +7,8 @@ import { attack } from "./attack";
 import { concede } from "./concede";
 import { passOrEndTurn } from "./pass";
 import { playCard } from "./play-card";
+import { activateAbility } from "./activate-ability";
+import { resolveChoice } from "./resolve-choice";
 import { getLegalActions, validateAction, type ActionContext } from "./validate";
 
 export type { ActionContext };
@@ -35,7 +37,13 @@ export function applyAction(
 
   switch (action.type) {
     case "play_card": {
-      const result = playCard(state, action.playerId, action.instanceId, catalog);
+      const result = playCard(
+        state,
+        action.playerId,
+        action.instanceId,
+        catalog,
+        action.targets,
+      );
       if ("error" in result) {
         return { state, events: [], error: result.error };
       }
@@ -73,13 +81,33 @@ export function applyAction(
       return finalizeResult(result.state, result.events);
     }
 
-    case "activate_ability":
-    case "resolve_choice":
-      return {
+    case "activate_ability": {
+      const result = activateAbility(
         state,
-        events: [],
-        error: `"${action.type}" is not implemented yet.`,
-      };
+        action.playerId,
+        action.instanceId,
+        action.abilityId,
+        catalog,
+        action.targets,
+      );
+      if ("error" in result) {
+        return { state, events: [], error: result.error };
+      }
+      return finalizeResult(result.state, result.events);
+    }
+
+    case "resolve_choice": {
+      const result = resolveChoice(
+        state,
+        action.playerId,
+        action.choiceId,
+        action.selected,
+      );
+      if ("error" in result) {
+        return { state, events: [], error: result.error };
+      }
+      return finalizeResult(result.state, result.events);
+    }
 
     default:
       return { state, events: [], error: "Unknown action." };

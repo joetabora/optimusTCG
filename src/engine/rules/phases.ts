@@ -4,13 +4,15 @@ import type { PhaseId } from "../types/ids";
 import type { GameState } from "../types/state";
 import { cloneState, opponentOf } from "../state/clone";
 import { drawCards } from "../state/rng-state";
-import { resolveEngagements } from "./engagement";
+import { resolveAbilities } from "../abilities/resolve";
+import { requireCardDefinition } from "../catalog/resolve";
 import { runIgnition } from "./flux";
 import {
   applyDeckEmptyLoss,
   checkWinCondition,
   maybeEmitMatchEnded,
 } from "./win";
+import { resolveEngagements } from "./engagement";
 
 const PHASE_ORDER: PhaseId[] = [
   "ignition",
@@ -75,6 +77,34 @@ export function runDrawPhase(
   };
 }
 
+export function resolveFieldCycleStartAbilities(
+  state: GameState,
+  catalog: CardCatalog,
+): { state: GameState; events: GameEvent[] } {
+  let nextState = cloneState(state);
+  let events: GameEvent[] = [];
+  const playerId = nextState.activePlayerId;
+
+  for (const instanceId of nextState.players[playerId].field) {
+    const definition = requireCardDefinition(
+      catalog,
+      nextState.instances[instanceId].defId,
+    );
+    const resolved = resolveAbilities(nextState, "on_cycle_start", {
+      catalog,
+      sourcePlayerId: playerId,
+      sourceInstanceId: instanceId,
+    }, definition.abilities);
+    nextState = resolved.state;
+    events = [...events, ...resolved.events];
+    if (nextState.pendingChoice) {
+      break;
+    }
+  }
+
+  return { state: nextState, events };
+}
+
 export function beginActiveTurn(
   state: GameState,
   catalog: CardCatalog,
@@ -85,6 +115,10 @@ export function beginActiveTurn(
   const ignition = runIgnition(nextState);
   nextState = ignition.state;
   events.push(...ignition.events);
+
+  const cycleStart = resolveFieldCycleStartAbilities(nextState, catalog);
+  nextState = cycleStart.state;
+  events.push(...cycleStart.events);
 
   const ignitionPhase = setPhase(nextState, "ignition");
   nextState = ignitionPhase.state;

@@ -7,7 +7,7 @@ import { DEFAULT_VAULT_SIZE } from "./schema";
 describe("card catalog", () => {
   it("loads a valid core set", () => {
     expect(validateCatalog(CORE_01_CARDS)).toEqual([]);
-    expect(catalog.size).toBe(20);
+    expect(catalog.size).toBe(21);
   });
 
   it("builds a legal default deck", () => {

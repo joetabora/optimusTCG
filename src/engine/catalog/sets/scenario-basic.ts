@@ -1,4 +1,5 @@
 import type { CardDefinition } from "../../types/card";
+import { artRef, onPlay, dealNexus } from "../builders";
 import { buildCatalog } from "../validate";
 
 const SET_ID = "scenario-basic";
@@ -16,8 +17,13 @@ function construct(
     name,
     kind: "construct",
     fluxCost,
-    tags: ["test"],
+    description: `${impact}/${stability} test construct.`,
     rulesText: `${impact}/${stability} test construct.`,
+    faction: "neutral",
+    rarity: "common",
+    keywords: [],
+    tags: ["test"],
+    artRef: artRef(id),
     collectible: false,
     impact,
     stability,
@@ -32,10 +38,18 @@ function schematic(id: string, name: string, fluxCost: number): CardDefinition {
     name,
     kind: "schematic",
     fluxCost,
-    tags: ["test"],
+    description: "Test schematic.",
     rulesText: "Test schematic.",
+    faction: "neutral",
+    rarity: "common",
+    keywords: [],
+    tags: ["test"],
+    artRef: artRef(id),
     collectible: false,
-    abilities: [],
+    abilities:
+      id === "hx_test_004"
+        ? [onPlay(dealNexus(1))]
+        : [],
   };
 }
 
@@ -46,8 +60,13 @@ function installation(id: string, name: string, fluxCost: number): CardDefinitio
     name,
     kind: "installation",
     fluxCost,
-    tags: ["test"],
+    description: "Test installation.",
     rulesText: "Test installation.",
+    faction: "neutral",
+    rarity: "common",
+    keywords: [],
+    tags: ["test"],
+    artRef: artRef(id),
     collectible: false,
     abilities: [],
   };

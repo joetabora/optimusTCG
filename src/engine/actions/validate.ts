@@ -106,8 +106,40 @@ export function validateAction(
       return null;
     }
 
-    case "activate_ability":
-      return "Ability activation is not implemented yet.";
+    case "activate_ability": {
+      if (state.phase !== "operations") {
+        return "Can only activate abilities during Operations.";
+      }
+      if (action.playerId !== state.activePlayerId) {
+        return "Not your turn.";
+      }
+
+      const instance = state.instances[action.instanceId];
+      if (!instance || instance.zone !== "field") {
+        return "Ability source must be on the Field.";
+      }
+
+      const definition = requireCardDefinition(catalog, instance.defId);
+      const ability = definition.abilities.find(
+        (entry) => entry.id === action.abilityId,
+      );
+      if (!ability || ability.trigger !== "activated") {
+        return "Unknown activated ability.";
+      }
+
+      if (
+        ability.oncePerCycle &&
+        instance.abilitiesUsedThisCycle.includes(ability.id)
+      ) {
+        return "Ability already used this cycle.";
+      }
+
+      if (ability.fluxCost && state.players[action.playerId].flux < ability.fluxCost) {
+        return "Insufficient Flux for ability.";
+      }
+
+      return null;
+    }
 
     case "pass":
     case "end_turn": {
@@ -120,8 +152,18 @@ export function validateAction(
       return null;
     }
 
-    case "resolve_choice":
-      return "Choice resolution is not implemented yet.";
+    case "resolve_choice": {
+      if (!state.pendingChoice) {
+        return "No pending choice.";
+      }
+      if (action.playerId !== state.pendingChoice.playerId) {
+        return "Not your choice to resolve.";
+      }
+      if (action.choiceId !== state.pendingChoice.id) {
+        return "Unknown choice id.";
+      }
+      return null;
+    }
 
     case "concede":
       if (state.winnerId) {
@@ -145,6 +187,18 @@ export function getLegalActions(
 
   const actions: GameAction[] = [];
 
+  if (state.pendingChoice && state.pendingChoice.playerId === playerId) {
+    actions.push({
+      type: "resolve_choice",
+      playerId,
+      choiceId: state.pendingChoice.id,
+      selected: [],
+    });
+    return actions;
+  }
+
+  const catalog = getCatalog(context);
+
   if (state.phase === "operations" && state.activePlayerId === playerId) {
     for (const instanceId of state.players[playerId].uplink) {
       const playAction: GameAction = {
@@ -158,6 +212,25 @@ export function getLegalActions(
     }
 
     for (const instanceId of state.players[playerId].field) {
+      const definition = requireCardDefinition(
+        catalog,
+        state.instances[instanceId].defId,
+      );
+      for (const ability of definition.abilities) {
+        if (ability.trigger !== "activated") {
+          continue;
+        }
+        const activateAction: GameAction = {
+          type: "activate_ability",
+          playerId,
+          instanceId,
+          abilityId: ability.id,
+        };
+        if (!validateAction(state, activateAction, context)) {
+          actions.push(activateAction);
+        }
+      }
+
       const nexusAction: GameAction = {
         type: "attack",
         playerId,

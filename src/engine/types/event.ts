@@ -32,6 +32,38 @@ export type GameEvent =
       attackerId: InstanceId;
       target: InstanceId | "nexus";
       playerId: PlayerId;
+    }
+  | {
+      type: "status_applied";
+      instanceId: InstanceId;
+      status: string;
+      playerId: PlayerId;
+    }
+  | {
+      type: "status_removed";
+      instanceId: InstanceId;
+      status: string;
+      playerId: PlayerId;
+    }
+  | {
+      type: "token_created";
+      instanceId: InstanceId;
+      defId: string;
+      playerId: PlayerId;
+      zone: ZoneId;
+    }
+  | {
+      type: "card_transformed";
+      instanceId: InstanceId;
+      fromDefId: string;
+      toDefId: string;
+      playerId: PlayerId;
+    }
+  | {
+      type: "stat_modified";
+      instanceId: InstanceId;
+      stat: "impact" | "stability";
+      amount: number;
     };
 
 export interface ApplyResult {

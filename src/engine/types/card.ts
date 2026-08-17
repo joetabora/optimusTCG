@@ -6,6 +6,8 @@ import type {
   PlayerId,
   ZoneId,
 } from "./ids";
+import type { FactionId, KeywordId, Rarity } from "./card-meta";
+import type { StatusId } from "./status";
 
 export interface CardDefinition {
   id: CardDefId;
@@ -13,8 +15,14 @@ export interface CardDefinition {
   name: string;
   kind: CardKind;
   fluxCost: number;
-  tags: string[];
+  description: string;
   rulesText: string;
+  flavorText?: string;
+  faction: FactionId;
+  rarity: Rarity;
+  keywords: KeywordId[];
+  tags: string[];
+  artRef: string;
   collectible: boolean;
   impact?: number;
   stability?: number;
@@ -33,6 +41,9 @@ export interface CardInstance {
   exhausted: boolean;
   counters: Record<string, number>;
   attachments: InstanceId[];
+  statuses: StatusId[];
+  /** Tracks activated/on-cycle abilities used this cycle. */
+  abilitiesUsedThisCycle: string[];
 }
 
 export function createCardInstance(
@@ -53,5 +64,7 @@ export function createCardInstance(
     exhausted: definition.kind === "construct",
     counters: {},
     attachments: [],
+    statuses: [],
+    abilitiesUsedThisCycle: [],
   };
 }

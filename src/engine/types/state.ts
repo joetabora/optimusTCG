@@ -1,13 +1,21 @@
 import type { CardInstance } from "./card";
-import type { EngagementAssignment } from "./effect";
+import type { EffectDefinition } from "./effect";
 import type { CommandIndex, InstanceId, PhaseId, PlayerId, WinReason } from "./ids";
 import type { CardCatalog } from "../catalog/schema";
+import type { EffectContext } from "../effects/context";
+
+export interface EffectContinuation {
+  effects: EffectDefinition[];
+  cursor: number;
+  context: EffectContext;
+}
 
 export interface PendingChoice {
   id: string;
   playerId: PlayerId;
   prompt: "choose_target" | "assign_engagements";
   legalTargets: InstanceId[] | "nexus";
+  continuation?: EffectContinuation;
 }
 
 export interface PlayerState {
@@ -27,12 +35,13 @@ export interface GameState {
   matchId: string;
   seed: number;
   rngIndex: number;
+  instanceCounter: number;
   cycle: number;
   activePlayerId: PlayerId;
   phase: PhaseId;
   players: Record<PlayerId, PlayerState>;
   instances: Record<InstanceId, CardInstance>;
-  engagements: EngagementAssignment[];
+  engagements: import("./effect").EngagementAssignment[];
   hasPassedOperations: boolean;
   pendingChoice: PendingChoice | null;
   winnerId: PlayerId | null;
