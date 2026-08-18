@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildDefaultDeck, getCardCatalog } from "../catalog";
+import { buildDefaultDeck } from "../catalog/sets/core-01";
 import {
   DEFAULT_STARTING_INTEGRITY,
   DEFAULT_STARTING_UPLINK_SIZE,
@@ -7,25 +7,34 @@ import {
 } from "../catalog/schema";
 import { validateDeckList } from "../catalog/validate";
 import { createDefaultMatch, createMatch } from "./create-match";
+import { getCardCatalog } from "../catalog";
+import { completePregame } from "../test-helpers/complete-pregame";
 
 describe("createMatch", () => {
-  it("creates a match in operations phase with player a active", () => {
+  it("creates a match in pregame mulligan by default", () => {
     const state = createDefaultMatch(42, "test-match");
 
     expect(state.schemaVersion).toBe(1);
     expect(state.matchId).toBe("test-match");
     expect(state.seed).toBe(42);
     expect(state.cycle).toBe(1);
-    expect(state.phase).toBe("operations");
-    expect(state.activePlayerId).toBe("a");
+    expect(state.pregame).toBe("mulligan_a");
     expect(state.winnerId).toBeNull();
     expect(state.winReason).toBeNull();
     expect(state.commandIndex).toBe(0);
     expect(state.engagements).toEqual([]);
   });
 
+  it("creates a match in operations after pregame is completed", () => {
+    const state = completePregame(createDefaultMatch());
+
+    expect(state.phase).toBe("operations");
+    expect(state.activePlayerId).toBe("a");
+    expect(state.pregame).toBe("complete");
+  });
+
   it("initializes player a flux after opening turn setup", () => {
-    const state = createDefaultMatch();
+    const state = completePregame(createDefaultMatch());
 
     expect(state.players.a.fluxMax).toBe(1);
     expect(state.players.a.flux).toBe(1);
@@ -36,7 +45,7 @@ describe("createMatch", () => {
   });
 
   it("deals opening uplink and first-cycle draw for active player", () => {
-    const state = createDefaultMatch(99, "deal-test");
+    const state = completePregame(createDefaultMatch(99, "deal-test"));
 
     expect(state.players.a.uplink).toHaveLength(DEFAULT_STARTING_UPLINK_SIZE + 1);
     expect(state.players.b.uplink).toHaveLength(DEFAULT_STARTING_UPLINK_SIZE);
@@ -78,6 +87,7 @@ describe("createMatch", () => {
         matchId: "bad-deck",
         seed: 1,
         decks: { a: deck, b: buildDefaultDeck() },
+        skipMulligan: true,
       }),
     ).toThrow(/Invalid deck/);
   });

@@ -120,6 +120,8 @@ export function createMatch(config: MatchConfig): GameState {
     winnerId: null,
     winReason: null,
     commandIndex: 0,
+    pregame: config.skipMulligan ? "complete" : "mulligan_a",
+    mulliganUsed: { a: false, b: false },
   };
 
   const events: GameEvent[] = [{ type: "match_started", seed: config.seed }];
@@ -130,7 +132,7 @@ export function createMatch(config: MatchConfig): GameState {
     events.push(...dealt.events);
   }
 
-  if (!config.skipOpeningTurnSetup) {
+  if (!config.skipOpeningTurnSetup && state.pregame === "complete") {
     const turn = beginActiveTurn(state, catalog);
     state = turn.state;
     events.push(...turn.events);

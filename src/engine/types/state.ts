@@ -1,7 +1,6 @@
 import type { CardInstance } from "./card";
 import type { EffectDefinition } from "./effect";
 import type { CommandIndex, InstanceId, PhaseId, PlayerId, WinReason } from "./ids";
-import type { CardCatalog } from "../catalog/schema";
 import type { EffectContext } from "../effects/context";
 
 export interface EffectContinuation {
@@ -30,6 +29,8 @@ export interface PlayerState {
   nullZone: InstanceId[];
 }
 
+export type PregameStage = "mulligan_a" | "mulligan_b" | "complete";
+
 export interface GameState {
   schemaVersion: 1;
   matchId: string;
@@ -39,6 +40,8 @@ export interface GameState {
   cycle: number;
   activePlayerId: PlayerId;
   phase: PhaseId;
+  pregame: PregameStage;
+  mulliganUsed: Record<PlayerId, boolean>;
   players: Record<PlayerId, PlayerState>;
   instances: Record<InstanceId, CardInstance>;
   engagements: import("./effect").EngagementAssignment[];
@@ -53,10 +56,11 @@ export interface MatchConfig {
   matchId: string;
   seed: number;
   decks: Record<PlayerId, import("./ids").CardDefId[]>;
-  catalog?: CardCatalog;
+  catalog?: import("../catalog/schema").CardCatalog;
   deckSize?: number;
   startingIntegrity?: number;
   startingUplinkSize?: number;
   skipOpeningTurnSetup?: boolean;
   skipShuffle?: boolean;
+  skipMulligan?: boolean;
 }

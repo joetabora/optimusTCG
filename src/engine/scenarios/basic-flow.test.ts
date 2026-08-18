@@ -25,6 +25,7 @@ function createFlowMatch() {
     deckSize: deck.length,
     decks: { a: [...deck], b: [...deck] },
     skipShuffle: true,
+    skipMulligan: true,
   });
 }
 
@@ -135,6 +136,7 @@ describe("basic flow scenario", () => {
       deckSize: buildScenarioDeck().length,
       decks: { a: buildScenarioDeck(), b: buildScenarioDeck() },
       skipShuffle: true,
+      skipMulligan: true,
     });
 
     const attackerCard = combatState.players.a.uplink.find(

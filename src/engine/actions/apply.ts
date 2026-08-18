@@ -9,6 +9,7 @@ import { passOrEndTurn } from "./pass";
 import { playCard } from "./play-card";
 import { activateAbility } from "./activate-ability";
 import { resolveChoice } from "./resolve-choice";
+import { keepHand, mulliganHand } from "./pregame";
 import { getLegalActions, validateAction, type ActionContext } from "./validate";
 
 export type { ActionContext };
@@ -103,6 +104,22 @@ export function applyAction(
         action.choiceId,
         action.selected,
       );
+      if ("error" in result) {
+        return { state, events: [], error: result.error };
+      }
+      return finalizeResult(result.state, result.events);
+    }
+
+    case "keep_hand": {
+      const result = keepHand(state, action.playerId, catalog);
+      if ("error" in result) {
+        return { state, events: [], error: result.error };
+      }
+      return finalizeResult(result.state, result.events);
+    }
+
+    case "mulligan": {
+      const result = mulliganHand(state, action.playerId, catalog);
       if ("error" in result) {
         return { state, events: [], error: result.error };
       }

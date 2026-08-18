@@ -10,6 +10,7 @@ interface AnimatedCardProps extends HTMLMotionProps<"div"> {
   selected?: boolean;
   disabled?: boolean;
   layoutAnimated?: boolean;
+  draggable?: boolean;
 }
 
 export function AnimatedCard({

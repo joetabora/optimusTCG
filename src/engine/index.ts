@@ -13,6 +13,7 @@ export { interpretEffects, interpretEffect } from "./effects/interpret";
 export { resolveAbilities } from "./abilities/resolve";
 export { isTerminal } from "./rules/terminal";
 export { getTurnState } from "./types/turn";
+export { getPregamePlayer } from "./actions/pregame";
 export { createScenarioMatch } from "./test-helpers/scenario-match";
 
 export type {
@@ -20,6 +21,7 @@ export type {
   MatchConfig,
   PlayerState,
   PendingChoice,
+  PregameStage,
 } from "./types/state";
 export type { CardDefinition, CardInstance } from "./types/card";
 export type { FactionId, Rarity, KeywordId } from "./types/card-meta";

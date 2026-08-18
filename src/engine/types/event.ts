@@ -64,6 +64,12 @@ export type GameEvent =
       instanceId: InstanceId;
       stat: "impact" | "stability";
       amount: number;
+    }
+  | { type: "hand_mulliganed"; playerId: PlayerId }
+  | {
+      type: "pregame_advanced";
+      from: import("./state").PregameStage;
+      to: import("./state").PregameStage;
     };
 
 export interface ApplyResult {

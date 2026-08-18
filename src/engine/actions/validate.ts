@@ -6,6 +6,7 @@ import type { PlayerId } from "../types/ids";
 import type { GameState } from "../types/state";
 import { isConstructOnField } from "../state/zones";
 import { opponentOf } from "../state/clone";
+import { getPregamePlayer } from "./pregame";
 
 export interface ActionContext {
   catalog?: CardCatalog;
@@ -28,9 +29,38 @@ export function validateAction(
     return "Waiting for choice resolution.";
   }
 
+  if (state.pregame !== "complete" && action.type !== "keep_hand" && action.type !== "mulligan" && action.type !== "concede") {
+    return "Pregame is not complete.";
+  }
+
   const catalog = getCatalog(context);
 
   switch (action.type) {
+    case "keep_hand": {
+      const pregamePlayer = getPregamePlayer(state);
+      if (!pregamePlayer) {
+        return "Pregame is complete.";
+      }
+      if (action.playerId !== pregamePlayer) {
+        return "Not your mulligan step.";
+      }
+      return null;
+    }
+
+    case "mulligan": {
+      const pregamePlayer = getPregamePlayer(state);
+      if (!pregamePlayer) {
+        return "Pregame is complete.";
+      }
+      if (action.playerId !== pregamePlayer) {
+        return "Not your mulligan step.";
+      }
+      if (state.mulliganUsed[action.playerId]) {
+        return "Mulligan already used.";
+      }
+      return null;
+    }
+
     case "play_card": {
       if (state.phase !== "operations") {
         return "Can only play cards during Operations.";
@@ -197,7 +227,22 @@ export function getLegalActions(
     return actions;
   }
 
+  const pregamePlayer = getPregamePlayer(state);
+  if (pregamePlayer === playerId) {
+    actions.push({ type: "keep_hand", playerId });
+    if (!state.mulliganUsed[playerId]) {
+      actions.push({ type: "mulligan", playerId });
+    }
+    actions.push({ type: "concede", playerId });
+    return actions;
+  }
+
   const catalog = getCatalog(context);
+
+  if (state.pregame !== "complete") {
+    actions.push({ type: "concede", playerId });
+    return actions;
+  }
 
   if (state.phase === "operations" && state.activePlayerId === playerId) {
     for (const instanceId of state.players[playerId].uplink) {

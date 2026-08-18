@@ -30,7 +30,9 @@ export type GameAction =
       choiceId: string;
       selected: InstanceId[];
     }
-  | { type: "concede"; playerId: PlayerId };
+  | { type: "concede"; playerId: PlayerId }
+  | { type: "keep_hand"; playerId: PlayerId }
+  | { type: "mulligan"; playerId: PlayerId };
 
 /** Map legacy assign_engagement commands to attack actions. */
 export type LegacyCommand =

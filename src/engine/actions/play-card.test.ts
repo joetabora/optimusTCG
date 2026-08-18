@@ -67,6 +67,7 @@ describe("play_card action", () => {
       deckSize: schematicDeck.length,
       decks: { a: schematicDeck, b: schematicDeck },
       skipShuffle: true,
+      skipMulligan: true,
     });
 
     const dataBurst = state.players.a.uplink.find(

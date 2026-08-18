@@ -13,6 +13,7 @@ interface GameCardProps {
   targetable?: boolean;
   interactive?: boolean;
   disabled?: boolean;
+  draggable?: boolean;
   onSelect?: () => void;
   onInspect?: () => void;
   className?: string;
@@ -27,6 +28,7 @@ export function GameCard({
   targetable = false,
   interactive = true,
   disabled = false,
+  draggable = false,
   onSelect,
   onInspect,
   className,
@@ -65,6 +67,11 @@ export function GameCard({
       interactive={interactive && !faceDown}
       selected={selected}
       disabled={disabled}
+      draggable={draggable}
+      drag={draggable}
+      dragSnapToOrigin
+      dragElastic={0.12}
+      whileDrag={{ scale: 1.04, zIndex: 50 }}
       className={cn("cursor-pointer select-none", className)}
       style={style}
       onPointerDown={handlePointerDown}

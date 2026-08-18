@@ -71,6 +71,7 @@ export function HandZone({
               const offset = index - center;
               const rotation = offset * 4;
               const playable = interaction.isHandCardPlayable(instanceId);
+              const disabledReason = interaction.handCardDisabledReason(instanceId);
 
               return (
                 <div
@@ -81,17 +82,22 @@ export function HandZone({
                     zIndex: index,
                     transform: `rotate(${rotation}deg) translateY(${Math.abs(offset) * 2}px)`,
                   }}
+                  title={disabledReason ?? undefined}
+                  aria-label={
+                    disabledReason
+                      ? `${card.name}: ${disabledReason}`
+                      : card.name
+                  }
                 >
                   <GameCard
                     card={card}
                     orientation="hand"
                     selected={interaction.selectedHandCardId === instanceId}
                     interactive
+                    draggable={playable && interaction.canControl}
                     disabled={!playable}
                     onSelect={() => {
-                      if (playable) {
-                        interaction.selectHandCard(instanceId);
-                      }
+                      interaction.selectHandCard(instanceId);
                     }}
                     onInspect={() => interaction.openInspect(instanceId)}
                   />

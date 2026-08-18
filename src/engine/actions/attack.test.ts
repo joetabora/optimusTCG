@@ -21,6 +21,7 @@ describe("attack action", () => {
       deckSize: buildScenarioDeck().length,
       decks: { a: buildScenarioDeck(), b: buildScenarioDeck() },
       skipShuffle: true,
+      skipMulligan: true,
     });
 
     const sparkNode = state.players.a.uplink.find(
@@ -65,6 +66,7 @@ describe("attack action", () => {
       deckSize: buildScenarioDeck().length,
       decks: { a: buildScenarioDeck(), b: buildScenarioDeck() },
       skipShuffle: true,
+      skipMulligan: true,
     });
 
     const sparkNode = state.players.a.uplink.find(

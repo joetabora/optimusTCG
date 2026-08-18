@@ -13,6 +13,7 @@ interface FieldZoneProps {
   state: GameState;
   catalog: CardCatalog;
   opponentView?: boolean;
+  isDeployZone?: boolean;
 }
 
 export function FieldZone({
@@ -20,18 +21,34 @@ export function FieldZone({
   state,
   catalog,
   opponentView = false,
+  isDeployZone = false,
 }: FieldZoneProps) {
   const interaction = useInteraction();
   const fieldIds = state.players[playerId].field;
+  const deployHighlight =
+    isDeployZone &&
+    interaction.mode === "playCard" &&
+    interaction.isPendingConstructPlay();
 
   return (
     <div
       className={cn(
         "relative flex min-h-[calc(var(--card-height)+1.5rem)] flex-1 items-center justify-center gap-3 px-4 py-3",
         opponentView ? "flex-row-reverse" : "flex-row",
+        deployHighlight && "ring-1 ring-inset ring-cyan-300/30",
       )}
+      onPointerUp={() => {
+        if (deployHighlight) {
+          interaction.playPendingOnField();
+        }
+      }}
     >
-      <div className="absolute inset-3 rounded-[1.4rem] border border-white/5 bg-black/15 backdrop-blur-[1px]" />
+      <div
+        className={cn(
+          "absolute inset-3 rounded-[1.4rem] border border-white/5 bg-black/15 backdrop-blur-[1px]",
+          deployHighlight && "border-cyan-300/25 bg-cyan-500/5",
+        )}
+      />
       <div className="relative z-10 flex flex-wrap items-end justify-center gap-3">
         {fieldIds.map((instanceId) => {
           const card = resolveCardDisplay(catalog, state.instances, instanceId);
@@ -40,10 +57,13 @@ export function FieldZone({
           }
 
           const targetable =
-            interaction.mode === "declareAttack" &&
-            interaction.isValidAttackTarget(instanceId);
-          const selected = interaction.isAttackerSelected(instanceId);
-          const pendingTarget = interaction.isPendingTarget(instanceId);
+            (interaction.mode === "declareAttack" &&
+              interaction.isValidAttackTarget(instanceId)) ||
+            (interaction.mode === "targeting" &&
+              interaction.isPendingTargetLegal(instanceId));
+          const selected =
+            interaction.isAttackerSelected(instanceId) ||
+            interaction.isPendingTarget(instanceId);
 
           return (
             <GameCard
@@ -51,7 +71,7 @@ export function FieldZone({
               card={card}
               orientation="field"
               selected={selected}
-              targetable={targetable || pendingTarget}
+              targetable={targetable}
               interactive={interaction.canControl}
               onSelect={() => {
                 if (interaction.mode === "declareAttack") {
@@ -59,7 +79,9 @@ export function FieldZone({
                   return;
                 }
                 if (interaction.mode === "targeting") {
-                  interaction.selectPendingTarget(instanceId);
+                  if (interaction.isPendingTargetLegal(instanceId)) {
+                    interaction.selectPendingTarget(instanceId);
+                  }
                   return;
                 }
                 interaction.selectFieldCard(instanceId);
@@ -69,7 +91,9 @@ export function FieldZone({
           );
         })}
         {fieldIds.length === 0 ? (
-          <p className="px-4 text-sm text-white/30">Field empty</p>
+          <p className="px-4 text-sm text-white/30">
+            {deployHighlight ? "Release to deploy" : "Field empty"}
+          </p>
         ) : null}
       </div>
     </div>

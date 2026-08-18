@@ -45,6 +45,7 @@ export function cloneInstances(
 export function cloneState(state: GameState): GameState {
   return {
     ...state,
+    mulliganUsed: { ...state.mulliganUsed },
     players: clonePlayers(state.players),
     instances: cloneInstances(state.instances),
     engagements: [...state.engagements],

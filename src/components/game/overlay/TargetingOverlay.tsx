@@ -24,7 +24,9 @@ export function TargetingOverlay({
   return (
     <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--card-height)+5rem)] z-30 flex justify-center px-4">
       <div className="flex min-h-11 max-w-lg flex-wrap items-center gap-3 rounded-2xl border border-amber-300/30 bg-[var(--helix-glass)] px-4 py-3 backdrop-blur-md">
-        <p className="text-sm text-amber-50/90">Choose a target.</p>
+        <p className="text-sm text-amber-50/90">
+          Choose target for played effect. This cannot be cancelled.
+        </p>
         <button
           type="button"
           disabled={selectedTargets.length === 0}
@@ -49,7 +51,7 @@ export function TargetingOverlay({
           }}
           className="min-h-11 rounded-full px-4 py-2 text-sm text-white/70"
         >
-          Cancel
+          Clear
         </button>
       </div>
     </div>

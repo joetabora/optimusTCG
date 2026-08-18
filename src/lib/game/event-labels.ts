@@ -57,6 +57,10 @@ export function formatGameEvent(
       return `${cardName(catalog, instances, event.instanceId)} transformed.`;
     case "stat_modified":
       return `${cardName(catalog, instances, event.instanceId)} ${event.stat} ${event.amount >= 0 ? "+" : ""}${event.amount}.`;
+    case "hand_mulliganed":
+      return `Player ${event.playerId.toUpperCase()} mulliganed.`;
+    case "pregame_advanced":
+      return `Pregame: ${event.from} → ${event.to}.`;
     default:
       return "Unknown event.";
   }

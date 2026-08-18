@@ -18,6 +18,7 @@ export function createScenarioMatch(seed = 7, matchId = "scenario-1"): GameState
       b: [...deck],
     },
     skipShuffle: true,
+    skipMulligan: true,
   });
 }
 

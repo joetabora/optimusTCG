@@ -22,6 +22,7 @@ function createCore01Match(leading: CardDefId[], seed = 1): GameState {
     catalog,
     decks: { a: buildDeckWithLeading(...leading), b: buildDefaultDeck() },
     skipShuffle: true,
+    skipMulligan: true,
   });
   state.players.a.flux = 5;
   state.players.a.fluxMax = 5;
